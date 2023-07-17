@@ -4,19 +4,34 @@ import { background, soundOff, soundOn } from '../assets/index';
 const SoundButton = () => {
   const [soundEnabled, setSoundEnabled] = useState(false);
   const audioRef = useRef(null);
-  const unmuteClicked = useRef(false);
+  const firstInteraction = useRef(true);
 
   const toggleSound = () => {
-    if (!unmuteClicked.current) {
-      unmuteClicked.current = true;
-      audioRef.current.play();
-    }
     setSoundEnabled(!soundEnabled);
   };
 
   useEffect(() => {
-    if (audioRef.current && !soundEnabled) {
-      audioRef.current.pause();
+    const handleFirstInteraction = () => {
+      if (firstInteraction.current) {
+        audioRef.current.play();
+        firstInteraction.current = false;
+      }
+    };
+
+    document.addEventListener('click', handleFirstInteraction);
+
+    return () => {
+      document.removeEventListener('click', handleFirstInteraction);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      if (soundEnabled) {
+        audioRef.current.play();
+      } else {
+        audioRef.current.pause();
+      }
     }
   }, [soundEnabled]);
 
